@@ -1,60 +1,79 @@
-import React, { useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
+import Link from './components/Link'
 import axios from 'axios';
 
-function App(){
-  const [data, setData] = useState({ hits: [] }); // Hits = Hacker News Articles...
-  const [query, setQuery] = useState('redux');
-  const [url, setUrl] = useState(
-    'http://hn.algolia.com/api/v1/search?query=redux'
-  );
+const useDataApi = (initialUrl, initialData) => {
+  const [data, setData] = useState(initialData);
+  const [url, setUrl] = useState(initialUrl);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
 
   const fetchData = async () => {
+    setIsError(false);
     setIsLoading(true);
 
     try {
       const result = await axios(url);
+
       setData(result.data);
-    } catch(error) {
-      setIsError(true)
+    } catch (error) {
+      setIsError(true);
     }
-    setIsLoading(false)
+
+    setIsLoading(false);
   };
 
   useEffect(() => {
     fetchData();
   }, [url]);
 
-  const doGet = event => {
-    setUrl(`http://hn.algolia.com/api/v1/search?query=${query}`);
+  const doGet = (event, url) => {
+    setUrl(url);
     event.preventDefault();
   };
 
-  return(
-    <React.Fragment>
-      <form onSubmit={doGet}>
-        <input type="text"
-              value={query}
-              onChange={event => setQuery(event.target.value)}
+  return { data, isLoading, isError, doGet };
+};
+
+function App() {
+  const [query, setQuery] = useState('redux');
+  const { data, isLoading, isError, doGet } = useDataApi(
+    'http://hn.algolia.com/api/v1/search?query=redux',
+    { hits: [] },
+  );
+
+  return (
+    <Fragment>
+      <form
+        onSubmit={event =>
+          doGet(
+            event,
+            `http://hn.algolia.com/api/v1/search?query=${query}`,
+          )
+        }
+      >
+        <input
+          type="text"
+          value={query}
+          onChange={event => setQuery(event.target.value)}
         />
         <button type="submit">Search</button>
-        </form>
+      </form>
 
-        { isError && <div>Something went terribly wrong...</div> }
+      {isError && <div>Something went wrong ...</div>}
 
-        {isLoading ? (
-          <div>Loading...</div>
-        ): (
-          <ul>
-            {data.hits.map(item => (
-              <li key={item.objectID}>
-                <a href={item.url}>{item.title}</a>
-              </li>
+      {isLoading ? (
+        <div>Loading ...</div>
+      ) : (
+        <ul>
+          {data.hits.map(item => (
+            <li key={item.objectID}>
+              <Link href={item.url} text={item.title}/>
+            </li>
           ))}
-          </ul>
-        )}
-    </React.Fragment>
+        </ul>
+      )}
+    </Fragment>
   );
 }
 
