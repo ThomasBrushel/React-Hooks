@@ -12,52 +12,50 @@ function App(){
 
   const fetchData = async () => {
     setIsLoading(true);
-    setIsLoading(true);
 
     try {
       const result = await axios(url);
       setData(result.data);
     } catch(error) {
-      setIsLoading(false)
+      setIsError(true)
     }
+    setIsLoading(false)
   };
 
   useEffect(() => {
     fetchData();
   }, [url]);
 
+  const doGet = event => {
+    setUrl(`http://hn.algolia.com/api/v1/search?query=${query}`);
+    event.preventDefault();
+  };
+
   return(
     <React.Fragment>
-      <input type="text"
-             value={query}
-             onChange={event => setQuery(event.target.value)}
-      />
-      <button
-        type="button"
-        onClick={() =>
-        setUrl(`http://hn.algolia.com/api/v1/search?query=${query}`)
-        }
-      >
-        Search
-      </button>
+      <form onSubmit={doGet}>
+        <input type="text"
+              value={query}
+              onChange={event => setQuery(event.target.value)}
+        />
+        <button type="submit">Search</button>
+        </form>
 
-      { isError && <div>Something went terribly wrong...</div> }
+        { isError && <div>Something went terribly wrong...</div> }
 
-      {isLoading ? (
-        <div>Loading...</div>
-      ): (
-        <ul>
-          {data.hits.map(item => (
-            <li key={item.objectID}>
-              <a href={item.url}>{item.title}</a>
-            </li>
-        ))}
-        </ul>
-      )}
-    
+        {isLoading ? (
+          <div>Loading...</div>
+        ): (
+          <ul>
+            {data.hits.map(item => (
+              <li key={item.objectID}>
+                <a href={item.url}>{item.title}</a>
+              </li>
+          ))}
+          </ul>
+        )}
     </React.Fragment>
   );
-
 }
 
 export default App;
