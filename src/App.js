@@ -8,12 +8,18 @@ function App(){
     'http://hn.algolia.com/api/v1/search?query=redux'
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
 
   const fetchData = async () => {
     setIsLoading(true);
-    const result = await axios(url);
-    setData(result.data);
-    setIsLoading(false)
+    setIsLoading(true);
+
+    try {
+      const result = await axios(url);
+      setData(result.data);
+    } catch(error) {
+      setIsLoading(false)
+    }
   };
 
   useEffect(() => {
@@ -34,6 +40,9 @@ function App(){
       >
         Search
       </button>
+
+      { isError && <div>Something went terribly wrong...</div> }
+
       {isLoading ? (
         <div>Loading...</div>
       ): (
