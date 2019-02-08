@@ -4,18 +4,18 @@ import axios from 'axios';
 function App(){
   const [data, setData] = useState({ hits: [] }); // Hits = Hacker News Articles...
   const [query, setQuery] = useState('redux');
-  const [search, setSearch] = useState('');
+  const [url, setUrl] = useState(
+    'http://hn.algolia.com/api/v1/search?query=redux'
+  );
 
   const fetchData = async () => {
-    const result = await axios(
-      `http://hn.algolia.com/api/v1/search?query=${query}`,
-      );
+    const result = await axios(url);
     setData(result.data);
   };
 
   useEffect(() => {
     fetchData();
-  }, [query]);
+  }, [url]);
 
   return(
     <React.Fragment>
@@ -23,7 +23,12 @@ function App(){
              value={query}
              onChange={event => setQuery(event.target.value)}
       />
-      <button type="button" onClick={() => setSearch(query)}>
+      <button
+        type="button"
+        onClick={() =>
+        setUrl(`http://hn.algolia.com/api/v1/search?query=${query}`)
+        }
+      >
         Search
       </button>
     <ul>
